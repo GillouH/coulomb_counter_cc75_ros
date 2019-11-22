@@ -3,16 +3,17 @@
 
 
 from os import system
+system("python3 -m pip install --user coulomb_counter_cc75 rospkg")
+system("python3 -m pip install --user --upgrade coulomb_counter_cc75 rospkg")
 
-try:
-	from coulomb_counter_cc75 import Coulomb_counter
-	from rospy import Publisher, init_node, is_shutdown, ROSInterruptException
-except ImportError:
-	system("python3 -m pip install coulomb_counter_cc75 rospkg --user")
-	from coulomb_counter_cc75 import Coulomb_counter
-	from rospy import Publisher, init_node, is_shutdown, ROSInterruptException
+from rospy import init_node, Publisher, is_shutdown, get_param, has_param
 
+from coulomb_counter_cc75 import Coulomb_counter
 from coulomb_counter_cc75_ros.msg import Coulomb_counter_cc75 as Msg
+
+
+paramStr = "/coulomb_counter_cc75_ros/coulomb_counter_cc75_manager/portUSB"
+defaultPort = "/dev/coulomb_counter_cc75"
 
 
 class Coulomb_counter_ROS(Coulomb_counter):
@@ -30,7 +31,10 @@ class Coulomb_counter_ROS(Coulomb_counter):
 			self.stop()
 		for data in self:
 			if data["name"] not in ("First byte", "Check sum"):
-				getattr(self.msg, data["name"].lower().replace(" ", "_")).value = data["value"]
+				if "value" in data.keys():
+					getattr(self.msg, data["name"].lower().replace(" ", "_")).value = data["value"]
+				else:
+					getattr(self.msg, data["name"].lower().replace(" ", "_")).value = None
 				getattr(self.msg, data["name"].lower().replace(" ", "_")).unit = data["unit"]
 		self.msg.power.value = round(self.msg.voltage.value * self.msg.current.value, 2)
 		self.msg.power.unit = "W"
@@ -38,7 +42,9 @@ class Coulomb_counter_ROS(Coulomb_counter):
 
 
 if __name__ == "__main__":
-	coulomb_counter = Coulomb_counter_ROS("/dev/coulomb_counter_cc75")
+	coulomb_counter = Coulomb_counter_ROS(
+		get_param(paramStr) if has_param(paramStr) else defaultPort
+	)
 	try:
 		coulomb_counter.launch()
 	except KeyboardInterrupt:
