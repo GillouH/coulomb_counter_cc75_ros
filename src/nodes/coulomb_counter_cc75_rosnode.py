@@ -46,7 +46,8 @@ if __name__ == "__main__":
 		get_param(paramStr) if has_param(paramStr) else defaultPort
 	)
 	try:
-		coulomb_counter.launch()
+		coulomb_counter.start()
+		coulomb_counter.join()
 	except KeyboardInterrupt:
 		pass
 	finally:
