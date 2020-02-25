@@ -2,9 +2,9 @@
 # coding: utf-8
 
 
-from os import system
-system("python3 -m pip install --user coulomb_counter_cc75 rospkg")
-system("python3 -m pip install --user --upgrade coulomb_counter_cc75 rospkg")
+#from os import system
+#system("python3 -m pip install --user coulomb_counter_cc75 rospkg")
+#system("python3 -m pip install --user --upgrade coulomb_counter_cc75 rospkg")
 
 from rospy import init_node, Publisher, is_shutdown, get_param, has_param
 
